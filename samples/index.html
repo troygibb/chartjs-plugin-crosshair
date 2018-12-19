@@ -8,6 +8,8 @@
     <link rel="stylesheet" type="text/css" href="index.css" />
     <link rel="icon" type="image/ico" href="favicon.ico" />
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.7.1/dist/Chart.min.js"></script>
     <script src="../dist/chartjs-plugin-crosshair.js"></script>
   </head>
@@ -18,8 +20,8 @@
         <span class="name">Sample</span>
       </div>
       <div class="caption">
-        <a href="http://www.chartjs.org">Chart.js</a>
-        plugin to draw crosshair lines, interpolate values and zoom
+        <a href="http://www.chartjs.org">Chart.js</a> plugin to draw crosshair
+        lines, interpolate values and zoom
       </div>
       <div class="links">
         <a
@@ -49,11 +51,20 @@
   </body>
 
   <script>
-    function generateDataset(shift, label, color) {
+    function newDateString(days) {
+      return moment()
+        .add(days, "d")
+        .format();
+    }
+
+    function generateDataset(shift, label, color, useTime) {
       var data = [];
       var x = 0;
       while (x < 30) {
-        data.push({ x: x, y: Math.sin(shift + x / 3) });
+        data.push({
+          x: useTime ? newDateString(x) : x,
+          y: Math.sin(shift + x / 3)
+        });
         x += Math.random();
       }
       var dataset = {
@@ -175,29 +186,28 @@
     var chart5 = new Chart(document.getElementById("chart5").getContext("2d"), {
       type: "scatter",
       options: {
+        scales: {
+          xAxes: [
+            {
+              type: "time",
+              display: true,
+              scaleLabel: {
+                display: true,
+                labelString: "value"
+              }
+            }
+          ]
+        },
         plugins: {
           crosshair: {
             sync: {
               enabled: false
-            },
-            pan: {
-              incrementer: 3 // Defaults to 5 if not included.
             }
           }
         },
         tooltips: {
           mode: "interpolate",
-          intersect: false,
-          callbacks: {
-            title: function(a, d) {
-              return a[0].xLabel.toFixed(2);
-            },
-            label: function(i, d) {
-              return (
-                d.datasets[i.datasetIndex].label + ": " + i.yLabel.toFixed(2)
-              );
-            }
-          }
+          intersect: false
         },
         animation: {
           duration: 0
